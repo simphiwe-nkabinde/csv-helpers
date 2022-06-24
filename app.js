@@ -39,11 +39,15 @@ function csvArrayToObjects(csvArray) {
     return records;
 }
 
-function filterRecords(recordObjectsArr, options) {
-    let another = recordObjectsArr.map((match) => {
-        return {
-        [options.newKey]: match[options.oldKey]
-        }
+/**
+ * [someFunction description]
+ * @param  {[{}]} records object array of records
+ * @param  {[{newKey: string, oldKey: string}]} options list of key names to include and/or change from record object keys names.
+ * @return {[{}]}      filtered record objects. 
+ */
+function filterRecords(records, options) {
+    let another = records.map((match) => {
+        return { [options.newKey]: match[options.oldKey]  }
     })
     //remove duplicates
     let clean = [...new Set(another.map(JSON.stringify))].map(JSON.parse);
