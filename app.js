@@ -1,37 +1,38 @@
 const fs = require('fs');
 const {parse} = require('csv-parse');
+const { type } = require('os');
 
 const parser = parse({delimiter: ','}, function(err, data){
   let csvObjects = csvArrayToObjects(data);
-  let playerTable = filterRecords(csvObjects, {newKey: 'name', oldKey: 'player_name'})
-  let teamTable = filterRecords(csvObjects, {newKey: 'name', oldKey: 'team'})
-//   teamTable.push(filterRecords(csvObjects, {newKey: 'name', oldKey: 'opposition_team'}))
+  let playerTable = filterRecords(csvObjects, [['player_name', 'name'], 'team', ['x', 'x-cord']])
+  let teamTable = filterRecords(csvObjects, [['team', 'name']])
 
-  console.log('matches', csvObjects.length);
-  console.log('players: ', playerTable.length);
-  console.log('teams: ', teamTable.length);
+  console.log('matches', csvObjects);
+//   console.log('players: ', playerTable);
+//   console.log('teams: ', teamTable);
 });
 
-fs.createReadStream('1game_1.csv').pipe(parser);
+fs.createReadStream('test1.csv').pipe(parser);
+
 
 /**
- * takes mixed array of data from a parsed cvs file. creates array of objects containing each record with corresponding key names and values.
- * @param  {[[string]]} csvArray mixed array of data. array[0] contains column/key names. The rest contain values
- * @return {[{}]}      object array of all records
+ * takes 2d list of data from a parsed cvs file. returns objects with corresponding key value pairs.
+ * @param  {[[string]]} csvArray 2d array of parsed csv data. array[0] is a list of key names. all other rows contain values.
+ * @return {[{}]}      objects with corresponding key value pairs.
  */
-function csvArrayToObjects(csvArray) {
+ exports.csvArraysToObjects = (csvArray) => {
     let records = [];
 
-    //column/key names from first row
-    const keys = csvArray[0];
+    //column names from first row of csv parsed array
+    const keysRow = csvArray[0];
 
     for (let i = 1; i < csvArray.length; i++) {
-        const recordArr = csvArray[i];
+        const valuesRow = csvArray[i];
         let recordObj = {}
-        for (let j = 0; j < recordArr.length; j++) {
+        for (let j = 0; j < valuesRow.length; j++) {
             // set key value pairs for each record
-            const key = keys[j].toLowerCase()
-            const value = recordArr[j];
+            const key = keysRow[j].toLowerCase()
+            const value = valuesRow[j];
             recordObj[key] = value
         }
         records.push(recordObj)
@@ -40,16 +41,34 @@ function csvArrayToObjects(csvArray) {
 }
 
 /**
- * [someFunction description]
- * @param  {[{}]} records object array of records
- * @param  {[{newKey: string, oldKey: string}]} options list of key names to include and/or change from record object keys names.
- * @return {[{}]}      filtered record objects. 
+ * takes an object or array of objects with key value pairs. filters each object by specified
+ * key name/s and corresponding values. Changes existing key names to new key names and includes corresponding values.
+ * @param  {[{}]} objects single object or list of objects with key value pairs
+ * @param  {[string, [string,string]]} keyNames list of key names to include and to alter & include. eg.[ 'keyNameToInclude', ['oldKeyName', 'newKeyNew'], ] 
+ * @return {[{}]}      filtered objects with specified key names and values. 
  */
-function filterRecords(records, options) {
-    let another = records.map((match) => {
-        return { [options.newKey]: match[options.oldKey]  }
+ exports.filterObject = (objects, keyNames) => {
+    //if single object is given
+    if (!Array.isArray(objects)) {
+        objects = [objects]
+    }
+
+    let filteredArr = objects.map((property) => {
+        let recordObj = {}
+
+        //add key value pair to recordObj for each key name from keyNames param
+        keyNames.forEach(keyName => {
+            // if key name is only to be included and not altered. eg. [ ..., 'KeyName', ...]
+            if (typeof keyName == 'string') {
+                recordObj[keyName] = property[keyName]
+            } else {
+                //if keyName is to be altered and included. eg. [..., ['oldKeyName', 'newKeyName'], ...]
+                recordObj[keyName[1]] = property[keyName[0]]
+            }
+        });
+        return recordObj;
     })
     //remove duplicates
-    let clean = [...new Set(another.map(JSON.stringify))].map(JSON.parse);
-    return clean;
+    let cleanArray = [...new Set(filteredArr.map(JSON.stringify))].map(JSON.parse)
+    return cleanArray;
 }
