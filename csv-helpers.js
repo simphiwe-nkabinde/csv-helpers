@@ -26,8 +26,7 @@
 
 
 /**
- * takes an object or array of objects with key value pairs. filters each object by specified
- * key name/s and corresponding values. Changes existing key names to new key names and includes corresponding values.
+ * filter objects by property key names and Change property key names.
  * @param  {[{}]} objects single object or list of objects with key value pairs
  * @param  {[string, [string,string]]} keyNames list of key names to include and to alter & include. eg.[ 'keyNameToInclude', ['oldKeyName', 'newKeyNew'], ] 
  * @return {[{}]}      filtered objects with specified key names and values. 
