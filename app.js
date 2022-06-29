@@ -1,6 +1,5 @@
 const fs = require('fs');
 const {parse} = require('csv-parse');
-const { type } = require('os');
 
 const parser = parse({delimiter: ','}, function(err, data){
   let csvObjects = csvArrayToObjects(data);
