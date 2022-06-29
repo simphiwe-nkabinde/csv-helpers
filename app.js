@@ -11,7 +11,7 @@ const parser = parse({delimiter: ','}, function(err, data){
 //   console.log('teams: ', teamTable);
 });
 
-fs.createReadStream('test1.csv').pipe(parser);
+fs.createReadStream('1game_1.csv').pipe(parser);
 
 
 /**
